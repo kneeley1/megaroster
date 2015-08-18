@@ -1,22 +1,67 @@
 var Megaroster = function() {
-  this.veggies = ['cabbage', 'lettuce'];
+  var self = this;
 
+  this.save = function() {
+    try {
+      return (localStorage.students = JSON.stringify(self.students)   );
+    }
+    catch(err) {
+      return false;
+    }
+  };
+
+  this.load = function() {
+    try {
+      self.students = JSON.parse(localStorage.students);
+      $.each(self.students, function(index, student_name) {
+        self.appendToList(student_name);
+      });
+    }
+    catch(err) {
+      return false;
+    }
+  };
+
+  this.appendToList = function(student_name) {
+    // Grab the *template* list item from the page.
+    var li = $('#list_item_template').clone();
+    li.removeAttr('id')
+      .addClass('student')
+      .prepend(student_name)
+      .removeClass('hidden');
+
+    $('#students').append(li);
+  };
+
+  this.addStudent = function(student_name) {
+    self.students.push(student_name);
+    self.appendToList(student_name);
+    self.save();
+  };
 
   this.init = function() {
-    var self = this;
-    this.students = [];
+    self.students = [];
+    self.load();
 
+    $(document).on('click', 'button.delete', function(){
+      //remove from array
+      //remove from the ol
+      $(this).closest('li').remove();
+      //update local storage
+    });
 
     $('#new_student_form').on('submit', function (ev) {
-      ev.preventDefault(); //prevents default submit action
-      var student_name = $(this.student_name).val(); //access the s.name
-      self.students.push(student_name);//add it to the students array
-      $('#students').append('<li class="list-group-item">' + student_name + '</li>');//add to ol as an li
-      $(this.student_name).val('').focus();//clears the previous student name entry & makes it the focus
+      ev.preventDefault();
+      var student_name = $(this.student_name).val();
+
+      self.addStudent(student_name);
+
+      $(this.student_name)
+        .val('')
+        .focus();
 
     });
   };
-
 };
 
 var roster = new Megaroster();
